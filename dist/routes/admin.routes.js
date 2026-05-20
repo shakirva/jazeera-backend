@@ -39,6 +39,10 @@ router.patch('/routes/:id', admin_controller_1.updateRoute);
 // ── Customers ─────────────────────────────────────────────────────────────────
 router.get('/customers', admin_controller_1.getCustomers);
 router.patch('/customers/:id/location', admin_controller_1.updateCustomerLocation);
+// ── Leads ─────────────────────────────────────────────────────────────────────
+router.get('/leads', admin_controller_1.getLeads);
+router.patch('/leads/:id/approve', admin_controller_1.approveLead);
+router.patch('/leads/:id/reject', admin_controller_1.rejectLead);
 // ── Settings ──────────────────────────────────────────────────────────────────
 router.get('/settings', admin_controller_1.getSettings);
 router.patch('/settings', admin_controller_1.updateSettings);

@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateCustomerLocation = exports.getCustomers = exports.updateSettings = exports.getVanWarehouse = exports.getSettings = exports.updateRoute = exports.createRoute = exports.getRoutes = exports.updateUser = exports.createUser = exports.getUsers = exports.deleteVan = exports.updateVan = exports.createVan = exports.getVans = exports.getDailyReport = exports.getProducts = exports.getDrivers = exports.getSales = exports.getDeliveries = exports.getStats = void 0;
+exports.rejectLead = exports.approveLead = exports.getLeads = exports.updateCustomerLocation = exports.getCustomers = exports.updateSettings = exports.getVanWarehouse = exports.getSettings = exports.updateRoute = exports.createRoute = exports.getRoutes = exports.updateUser = exports.createUser = exports.getUsers = exports.deleteVan = exports.updateVan = exports.createVan = exports.getVans = exports.getDailyReport = exports.getProducts = exports.getDrivers = exports.getSales = exports.getDeliveries = exports.getStats = void 0;
 const prisma_1 = __importDefault(require("../utils/prisma"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 // ─── GET /api/v1/admin/stats ──────────────────────────────────────────────────
@@ -806,4 +806,69 @@ const updateCustomerLocation = async (req, res) => {
     }
 };
 exports.updateCustomerLocation = updateCustomerLocation;
+// ─── GET /api/v1/admin/leads ──────────────────────────────────────────────────
+const getLeads = async (req, res) => {
+    try {
+        const { status, driverId, page = '1', limit = '50' } = req.query;
+        const where = {};
+        if (status && status !== 'all')
+            where.status = status.toUpperCase();
+        if (driverId)
+            where.driverId = driverId;
+        const pageNum = parseInt(page);
+        const limitNum = parseInt(limit);
+        const skip = (pageNum - 1) * limitNum;
+        const [leads, total] = await Promise.all([
+            prisma_1.default.lead.findMany({
+                where,
+                skip,
+                take: limitNum,
+                orderBy: { createdAt: 'desc' },
+                include: {
+                    driver: { select: { id: true, name: true, email: true } },
+                    customer: { select: { id: true, name: true } },
+                },
+            }),
+            prisma_1.default.lead.count({ where }),
+        ]);
+        res.json({ success: true, data: leads, total, page: pageNum, limit: limitNum });
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, error: 'Failed to get leads' });
+    }
+};
+exports.getLeads = getLeads;
+// ─── PATCH /api/v1/admin/leads/:id/approve ────────────────────────────────────
+const approveLead = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const lead = await prisma_1.default.lead.update({
+            where: { id },
+            data: { status: 'APPROVED', approvedAt: new Date() },
+        });
+        res.json({ success: true, data: lead, message: 'Lead approved' });
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, error: 'Failed to approve lead' });
+    }
+};
+exports.approveLead = approveLead;
+// ─── PATCH /api/v1/admin/leads/:id/reject ─────────────────────────────────────
+const rejectLead = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const lead = await prisma_1.default.lead.update({
+            where: { id },
+            data: { status: 'REJECTED', rejectedAt: new Date() },
+        });
+        res.json({ success: true, data: lead, message: 'Lead rejected' });
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, error: 'Failed to reject lead' });
+    }
+};
+exports.rejectLead = rejectLead;
 //# sourceMappingURL=admin.controller.js.map

@@ -642,6 +642,8 @@ export const addLead = async (req: AuthRequest, res: Response): Promise<void> =>
     // Accept phone as string OR number (Flutter may send it as a number)
     const phone = req.body.phone != null ? String(req.body.phone) : undefined;
 
+    console.log('📝 addLead called with:', { driverId, name, phone, address, notes, latitude, longitude });
+
     if (!name) {
       res.status(400).json({ success: false, error: 'Customer name is required' });
       return;
@@ -659,6 +661,8 @@ export const addLead = async (req: AuthRequest, res: Response): Promise<void> =>
       },
     });
 
+    console.log('✅ Lead created:', lead);
+
     // ── Push to Odoo CRM (fire-and-forget — DB save must not fail if Odoo is down)
     pushLeadToOdoo(lead.id, { name, phone, street: address, description: notes }).catch((err) =>
       console.error('⚠️  Odoo lead push failed (non-blocking):', err?.message)
@@ -667,6 +671,7 @@ export const addLead = async (req: AuthRequest, res: Response): Promise<void> =>
     res.status(201).json({ success: true, data: lead });
   } catch (err: any) {
     console.error('❌ addLead error:', err?.message, err?.code, JSON.stringify(err?.meta));
+    console.error('❌ Full error:', err);
     res.status(500).json({ success: false, error: 'Failed to add lead' });
   }
 };

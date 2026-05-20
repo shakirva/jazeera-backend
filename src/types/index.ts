@@ -5,12 +5,12 @@ export interface AuthPayload {
   role: string;
 }
 
-export interface AuthRequest extends Request<any, any, any, any> {
+export interface AuthRequest extends Request {
   user?: AuthPayload;
   body: any;
   params: any;
   query: any;
-  headers: any;
+  headers: Record<string, any>;
   file?: Express.Multer.File;
 }
 
