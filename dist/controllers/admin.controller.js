@@ -41,7 +41,7 @@ const getStats = async (_req, res) => {
         });
     }
     catch (err) {
-        console.error(err);
+        console.error("CRASH IN WAREHOUSE:", err);
         res.status(500).json({ success: false, error: 'Failed to get stats' });
     }
 };
@@ -85,7 +85,7 @@ const getDeliveries = async (req, res) => {
         });
     }
     catch (err) {
-        console.error(err);
+        console.error("CRASH IN WAREHOUSE:", err);
         res.status(500).json({ success: false, error: 'Failed to get deliveries' });
     }
 };
@@ -133,7 +133,7 @@ const getSales = async (req, res) => {
         });
     }
     catch (err) {
-        console.error(err);
+        console.error("CRASH IN WAREHOUSE:", err);
         res.status(500).json({ success: false, error: 'Failed to get sales' });
     }
 };
@@ -183,7 +183,7 @@ const getDrivers = async (_req, res) => {
         });
     }
     catch (err) {
-        console.error(err);
+        console.error("CRASH IN WAREHOUSE:", err);
         res.status(500).json({ success: false, error: 'Failed to get drivers' });
     }
 };
@@ -240,7 +240,7 @@ const getProducts = async (req, res) => {
         });
     }
     catch (err) {
-        console.error(err);
+        console.error("CRASH IN WAREHOUSE:", err);
         res.status(500).json({ success: false, error: 'Failed to get products' });
     }
 };
@@ -315,7 +315,7 @@ const getDailyReport = async (req, res) => {
         });
     }
     catch (err) {
-        console.error(err);
+        console.error("CRASH IN WAREHOUSE:", err);
         res.status(500).json({ success: false, error: 'Failed to generate daily report' });
     }
 };
@@ -339,7 +339,7 @@ const getVans = async (_req, res) => {
         res.json({ success: true, data: vans });
     }
     catch (err) {
-        console.error(err);
+        console.error("CRASH IN WAREHOUSE:", err);
         res.status(500).json({ success: false, error: 'Failed to get vans' });
     }
 };
@@ -363,7 +363,7 @@ const createVan = async (req, res) => {
             res.status(409).json({ success: false, error: 'Plate number already exists' });
         }
         else {
-            console.error(err);
+            console.error("CRASH IN WAREHOUSE:", err);
             res.status(500).json({ success: false, error: 'Failed to create van' });
         }
     }
@@ -391,7 +391,7 @@ const updateVan = async (req, res) => {
             res.status(404).json({ success: false, error: 'Van not found' });
         }
         else {
-            console.error(err);
+            console.error("CRASH IN WAREHOUSE:", err);
             res.status(500).json({ success: false, error: 'Failed to update van' });
         }
     }
@@ -409,7 +409,7 @@ const deleteVan = async (req, res) => {
             res.status(404).json({ success: false, error: 'Van not found' });
         }
         else {
-            console.error(err);
+            console.error("CRASH IN WAREHOUSE:", err);
             res.status(500).json({ success: false, error: 'Failed to delete van' });
         }
     }
@@ -432,7 +432,7 @@ const getUsers = async (_req, res) => {
         res.json({ success: true, data: users });
     }
     catch (err) {
-        console.error(err);
+        console.error("CRASH IN WAREHOUSE:", err);
         res.status(500).json({ success: false, error: 'Failed to get users' });
     }
 };
@@ -457,7 +457,7 @@ const createUser = async (req, res) => {
             res.status(409).json({ success: false, error: 'Email or phone already exists' });
         }
         else {
-            console.error(err);
+            console.error("CRASH IN WAREHOUSE:", err);
             res.status(500).json({ success: false, error: 'Failed to create user' });
         }
     }
@@ -493,7 +493,7 @@ const updateUser = async (req, res) => {
             res.status(404).json({ success: false, error: 'User not found' });
         }
         else {
-            console.error(err);
+            console.error("CRASH IN WAREHOUSE:", err);
             res.status(500).json({ success: false, error: 'Failed to update user' });
         }
     }
@@ -512,7 +512,7 @@ const getRoutes = async (_req, res) => {
         res.json({ success: true, data: routes });
     }
     catch (err) {
-        console.error(err);
+        console.error("CRASH IN WAREHOUSE:", err);
         res.status(500).json({ success: false, error: 'Failed to get routes' });
     }
 };
@@ -531,7 +531,7 @@ const createRoute = async (req, res) => {
         res.status(201).json({ success: true, data: route });
     }
     catch (err) {
-        console.error(err);
+        console.error("CRASH IN WAREHOUSE:", err);
         res.status(500).json({ success: false, error: 'Failed to create route' });
     }
 };
@@ -557,7 +557,7 @@ const updateRoute = async (req, res) => {
             res.status(404).json({ success: false, error: 'Route not found' });
         }
         else {
-            console.error(err);
+            console.error("CRASH IN WAREHOUSE:", err);
             res.status(500).json({ success: false, error: 'Failed to update route' });
         }
     }
@@ -648,7 +648,7 @@ const getVanWarehouse = async (req, res) => {
         const deliveries = driverIds.length > 0
             ? await prisma_1.default.delivery.findMany({
                 where: { driverId: { in: driverIds }, updatedAt: { gte: dayStart, lte: dayEnd } },
-                select: { id: true, status: true, totalAmount: true, customer: { select: { name: true } } },
+                select: { id: true, status: true, customer: { select: { name: true } } },
             })
             : [];
         // Build sold-per-product map from cash sales
@@ -716,7 +716,7 @@ const getVanWarehouse = async (req, res) => {
         });
     }
     catch (err) {
-        console.error(err);
+        console.error("CRASH IN WAREHOUSE:", err);
         res.status(500).json({ success: false, error: 'Failed to get van warehouse data' });
     }
 };
@@ -773,7 +773,7 @@ const getCustomers = async (req, res) => {
         res.json({ success: true, data: customers, total });
     }
     catch (err) {
-        console.error(err);
+        console.error("CRASH IN WAREHOUSE:", err);
         res.status(500).json({ success: false, error: 'Failed to fetch customers' });
     }
 };
@@ -801,7 +801,7 @@ const updateCustomerLocation = async (req, res) => {
         res.json({ success: true, data: customer, message: 'Customer location updated' });
     }
     catch (err) {
-        console.error(err);
+        console.error("CRASH IN WAREHOUSE:", err);
         res.status(500).json({ success: false, error: 'Failed to update customer location' });
     }
 };
@@ -834,7 +834,7 @@ const getLeads = async (req, res) => {
         res.json({ success: true, data: leads, total, page: pageNum, limit: limitNum });
     }
     catch (err) {
-        console.error(err);
+        console.error("CRASH IN WAREHOUSE:", err);
         res.status(500).json({ success: false, error: 'Failed to get leads' });
     }
 };
@@ -850,7 +850,7 @@ const approveLead = async (req, res) => {
         res.json({ success: true, data: lead, message: 'Lead approved' });
     }
     catch (err) {
-        console.error(err);
+        console.error("CRASH IN WAREHOUSE:", err);
         res.status(500).json({ success: false, error: 'Failed to approve lead' });
     }
 };
@@ -866,7 +866,7 @@ const rejectLead = async (req, res) => {
         res.json({ success: true, data: lead, message: 'Lead rejected' });
     }
     catch (err) {
-        console.error(err);
+        console.error("CRASH IN WAREHOUSE:", err);
         res.status(500).json({ success: false, error: 'Failed to reject lead' });
     }
 };

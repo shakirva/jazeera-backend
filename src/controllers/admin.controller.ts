@@ -46,7 +46,7 @@ export const getStats = async (_req: Request, res: Response): Promise<void> => {
       },
     });
   } catch (err) {
-    console.error(err);
+    console.error("CRASH IN WAREHOUSE:", err);
     res.status(500).json({ success: false, error: 'Failed to get stats' });
   }
 };
@@ -91,7 +91,7 @@ export const getDeliveries = async (req: Request, res: Response): Promise<void> 
       meta: { total, page: pageNum, limit: limitNum, totalPages: Math.ceil(total / limitNum) },
     });
   } catch (err) {
-    console.error(err);
+    console.error("CRASH IN WAREHOUSE:", err);
     res.status(500).json({ success: false, error: 'Failed to get deliveries' });
   }
 };
@@ -141,7 +141,7 @@ export const getSales = async (req: Request, res: Response): Promise<void> => {
       },
     });
   } catch (err) {
-    console.error(err);
+    console.error("CRASH IN WAREHOUSE:", err);
     res.status(500).json({ success: false, error: 'Failed to get sales' });
   }
 };
@@ -191,7 +191,7 @@ export const getDrivers = async (_req: Request, res: Response): Promise<void> =>
       })),
     });
   } catch (err) {
-    console.error(err);
+    console.error("CRASH IN WAREHOUSE:", err);
     res.status(500).json({ success: false, error: 'Failed to get drivers' });
   }
 };
@@ -250,7 +250,7 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
       meta: { total, page: pageNum, limit: limitNum, totalPages: Math.ceil(total / limitNum) },
     });
   } catch (err) {
-    console.error(err);
+    console.error("CRASH IN WAREHOUSE:", err);
     res.status(500).json({ success: false, error: 'Failed to get products' });
   }
 };
@@ -331,7 +331,7 @@ export const getDailyReport = async (req: Request, res: Response): Promise<void>
       },
     });
   } catch (err) {
-    console.error(err);
+    console.error("CRASH IN WAREHOUSE:", err);
     res.status(500).json({ success: false, error: 'Failed to generate daily report' });
   }
 };
@@ -356,7 +356,7 @@ export const getVans = async (_req: Request, res: Response): Promise<void> => {
     });
     res.json({ success: true, data: vans });
   } catch (err) {
-    console.error(err);
+    console.error("CRASH IN WAREHOUSE:", err);
     res.status(500).json({ success: false, error: 'Failed to get vans' });
   }
 };
@@ -378,7 +378,7 @@ export const createVan = async (req: Request, res: Response): Promise<void> => {
     if (err.code === 'P2002') {
       res.status(409).json({ success: false, error: 'Plate number already exists' });
     } else {
-      console.error(err);
+      console.error("CRASH IN WAREHOUSE:", err);
       res.status(500).json({ success: false, error: 'Failed to create van' });
     }
   }
@@ -404,7 +404,7 @@ export const updateVan = async (req: Request, res: Response): Promise<void> => {
     if (err.code === 'P2025') {
       res.status(404).json({ success: false, error: 'Van not found' });
     } else {
-      console.error(err);
+      console.error("CRASH IN WAREHOUSE:", err);
       res.status(500).json({ success: false, error: 'Failed to update van' });
     }
   }
@@ -420,7 +420,7 @@ export const deleteVan = async (req: Request, res: Response): Promise<void> => {
     if (err.code === 'P2025') {
       res.status(404).json({ success: false, error: 'Van not found' });
     } else {
-      console.error(err);
+      console.error("CRASH IN WAREHOUSE:", err);
       res.status(500).json({ success: false, error: 'Failed to delete van' });
     }
   }
@@ -443,7 +443,7 @@ export const getUsers = async (_req: Request, res: Response): Promise<void> => {
     });
     res.json({ success: true, data: users });
   } catch (err) {
-    console.error(err);
+    console.error("CRASH IN WAREHOUSE:", err);
     res.status(500).json({ success: false, error: 'Failed to get users' });
   }
 };
@@ -466,7 +466,7 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
     if (err.code === 'P2002') {
       res.status(409).json({ success: false, error: 'Email or phone already exists' });
     } else {
-      console.error(err);
+      console.error("CRASH IN WAREHOUSE:", err);
       res.status(500).json({ success: false, error: 'Failed to create user' });
     }
   }
@@ -495,7 +495,7 @@ export const updateUser = async (req: Request, res: Response): Promise<void> => 
     if (err.code === 'P2025') {
       res.status(404).json({ success: false, error: 'User not found' });
     } else {
-      console.error(err);
+      console.error("CRASH IN WAREHOUSE:", err);
       res.status(500).json({ success: false, error: 'Failed to update user' });
     }
   }
@@ -514,7 +514,7 @@ export const getRoutes = async (_req: Request, res: Response): Promise<void> => 
     });
     res.json({ success: true, data: routes });
   } catch (err) {
-    console.error(err);
+    console.error("CRASH IN WAREHOUSE:", err);
     res.status(500).json({ success: false, error: 'Failed to get routes' });
   }
 };
@@ -532,7 +532,7 @@ export const createRoute = async (req: Request, res: Response): Promise<void> =>
     });
     res.status(201).json({ success: true, data: route });
   } catch (err) {
-    console.error(err);
+    console.error("CRASH IN WAREHOUSE:", err);
     res.status(500).json({ success: false, error: 'Failed to create route' });
   }
 };
@@ -556,7 +556,7 @@ export const updateRoute = async (req: Request, res: Response): Promise<void> =>
     if (err.code === 'P2025') {
       res.status(404).json({ success: false, error: 'Route not found' });
     } else {
-      console.error(err);
+      console.error("CRASH IN WAREHOUSE:", err);
       res.status(500).json({ success: false, error: 'Failed to update route' });
     }
   }
@@ -657,7 +657,7 @@ export const getVanWarehouse = async (req: Request, res: Response): Promise<void
     const deliveries = driverIds.length > 0
       ? await prisma.delivery.findMany({
           where: { driverId: { in: driverIds }, updatedAt: { gte: dayStart, lte: dayEnd } },
-          select: { id: true, status: true, totalAmount: true, customer: { select: { name: true } } },
+          select: { id: true, status: true, customer: { select: { name: true } } },
         })
       : [];
 
@@ -730,7 +730,7 @@ export const getVanWarehouse = async (req: Request, res: Response): Promise<void
       },
     });
   } catch (err) {
-    console.error(err);
+    console.error("CRASH IN WAREHOUSE:", err);
     res.status(500).json({ success: false, error: 'Failed to get van warehouse data' });
   }
 };
@@ -788,7 +788,7 @@ export const getCustomers = async (req: Request, res: Response): Promise<void> =
 
     res.json({ success: true, data: customers, total });
   } catch (err) {
-    console.error(err);
+    console.error("CRASH IN WAREHOUSE:", err);
     res.status(500).json({ success: false, error: 'Failed to fetch customers' });
   }
 };
@@ -820,7 +820,7 @@ export const updateCustomerLocation = async (req: Request, res: Response): Promi
 
     res.json({ success: true, data: customer, message: 'Customer location updated' });
   } catch (err) {
-    console.error(err);
+    console.error("CRASH IN WAREHOUSE:", err);
     res.status(500).json({ success: false, error: 'Failed to update customer location' });
   }
 };
@@ -853,7 +853,7 @@ export const getLeads = async (req: Request, res: Response): Promise<void> => {
 
     res.json({ success: true, data: leads, total, page: pageNum, limit: limitNum });
   } catch (err) {
-    console.error(err);
+    console.error("CRASH IN WAREHOUSE:", err);
     res.status(500).json({ success: false, error: 'Failed to get leads' });
   }
 };
@@ -868,7 +868,7 @@ export const approveLead = async (req: Request, res: Response): Promise<void> =>
     });
     res.json({ success: true, data: lead, message: 'Lead approved' });
   } catch (err) {
-    console.error(err);
+    console.error("CRASH IN WAREHOUSE:", err);
     res.status(500).json({ success: false, error: 'Failed to approve lead' });
   }
 };
@@ -883,7 +883,7 @@ export const rejectLead = async (req: Request, res: Response): Promise<void> => 
     });
     res.json({ success: true, data: lead, message: 'Lead rejected' });
   } catch (err) {
-    console.error(err);
+    console.error("CRASH IN WAREHOUSE:", err);
     res.status(500).json({ success: false, error: 'Failed to reject lead' });
   }
 };
