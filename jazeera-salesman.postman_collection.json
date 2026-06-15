@@ -1,0 +1,338 @@
+{
+  "info": {
+    "_postman_id": "8b087095-2c8c-4f7f-a65a-eb80088cb154",
+    "name": "Jazeera Salesman Mobile API",
+    "description": "Collection for testing B2B Quotations and Client Visits endpoints for Salesmen.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Salesman Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"salesman@jazeera.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Quotations",
+      "item": [
+        {
+          "name": "Create Quotation (Draft)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"5ea8986a-30a8-43db-a3b9-dbc47acff0d1\",\n  \"remarks\": \"Bulk mineral water order\",\n  \"items\": [\n    {\n      \"productId\": \"24589969-85e9-426a-8777-887e7ffd17a2\",\n      \"quantity\": 50,\n      \"unitPrice\": 1.5,\n      \"requestedPrice\": 1.2,\n      \"suggestedMode\": true\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/salesman/quotations",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "salesman",
+                "quotations"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Quotations",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/salesman/quotations?status=DRAFT",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "salesman",
+                "quotations"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "DRAFT"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Quotation Details",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/salesman/quotations/{{quotation_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "salesman",
+                "quotations",
+                "{{quotation_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Quotation (Draft)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"remarks\": \"Bulk mineral water order - updated Remarks\",\n  \"items\": [\n    {\n      \"productId\": \"24589969-85e9-426a-8777-887e7ffd17a2\",\n      \"quantity\": 60,\n      \"unitPrice\": 1.5,\n      \"requestedPrice\": 1.15,\n      \"suggestedMode\": true\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/salesman/quotations/{{quotation_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "salesman",
+                "quotations",
+                "{{quotation_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Submit Quotation",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/salesman/quotations/{{quotation_id}}/submit",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "salesman",
+                "quotations",
+                "{{quotation_id}}",
+                "submit"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Visits Logs",
+      "item": [
+        {
+          "name": "Log Visit",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"5ea8986a-30a8-43db-a3b9-dbc47acff0d1\",\n  \"notes\": \"Met with shop owner, introduced new water crates package.\",\n  \"latitude\": 25.0754,\n  \"longitude\": 55.1887\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/salesman/visits",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "salesman",
+                "visits"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List My Visits",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/salesman/visits",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "salesman",
+                "visits"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "jwt_token",
+      "value": "PASTE_TOKEN_HERE",
+      "type": "string"
+    },
+    {
+      "key": "quotation_id",
+      "value": "PASTE_QUOTATION_UUID_HERE",
+      "type": "string"
+    }
+  ]
+}

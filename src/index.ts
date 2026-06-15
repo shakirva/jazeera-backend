@@ -16,6 +16,7 @@ import cashSaleRoutes from './routes/cashSale.routes';
 import syncRoutes from './routes/sync.routes';
 import adminRoutes from './routes/admin.routes';
 import odooRoutes from './routes/odoo.routes';
+import salesmanRoutes from './routes/salesman.routes';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -71,6 +72,7 @@ app.use('/api/v1/driver/sales', cashSaleRoutes);
 app.use('/api/v1/sync', syncRoutes);
 app.use('/api/v1/admin', adminRoutes);
 app.use('/api/v1/odoo', odooRoutes);
+app.use('/api/v1/salesman', salesmanRoutes);
 
 // ─── 404 ─────────────────────────────────────────────────────────────────────
 app.use((_req, res) => {

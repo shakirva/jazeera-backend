@@ -73,3 +73,36 @@ export const exportRules = [
   query('report').optional().isIn(['daily', 'deliveries', 'sales']).withMessage('report must be daily, deliveries, or sales'),
   query('date').optional().isISO8601().withMessage('date must be ISO8601 format (YYYY-MM-DD)'),
 ];
+
+// ─── Quotations ────────────────────────────────────────────────────────────────
+export const createQuotationRules = [
+  body('customerId').optional().isUUID().withMessage('customerId must be a valid UUID'),
+  body('remarks').optional().isLength({ max: 500 }).trim().escape(),
+  body('items').isArray({ min: 1 }).withMessage('items must be a non-empty array'),
+  body('items.*.productId').isUUID().withMessage('Each item must have a valid productId UUID'),
+  body('items.*.quantity').isInt({ min: 1 }).withMessage('Each item quantity must be at least 1'),
+  body('items.*.unitPrice').isFloat({ min: 0 }).withMessage('unitPrice must be a positive number'),
+  body('items.*.requestedPrice').optional().isFloat({ min: 0 }).withMessage('requestedPrice must be a positive number'),
+  body('items.*.discountPct').optional().isFloat({ min: 0, max: 100 }).withMessage('discountPct must be 0-100'),
+  body('items.*.suggestedMode').optional().isBoolean().withMessage('suggestedMode must be a boolean'),
+];
+
+export const updateQuotationRules = [
+  param('id').isUUID().withMessage('Quotation ID must be a UUID'),
+  body('customerId').optional().isUUID().withMessage('customerId must be a valid UUID'),
+  body('remarks').optional().isLength({ max: 500 }).trim().escape(),
+  body('items').optional().isArray({ min: 1 }).withMessage('items must be a non-empty array'),
+  body('items.*.productId').optional().isUUID().withMessage('Each item must have a valid productId UUID'),
+  body('items.*.quantity').optional().isInt({ min: 1 }).withMessage('Each item quantity must be at least 1'),
+  body('items.*.unitPrice').optional().isFloat({ min: 0 }).withMessage('unitPrice must be a positive number'),
+  body('items.*.requestedPrice').optional().isFloat({ min: 0 }).withMessage('requestedPrice must be a positive number'),
+  body('items.*.discountPct').optional().isFloat({ min: 0, max: 100 }).withMessage('discountPct must be 0-100'),
+  body('items.*.suggestedMode').optional().isBoolean().withMessage('suggestedMode must be a boolean'),
+];
+
+export const updateQuotationStatusRules = [
+  param('id').isUUID().withMessage('Quotation ID must be a UUID'),
+  body('status').isIn(['DRAFT', 'SUBMITTED', 'APPROVED', 'REJECTED']).withMessage('Invalid status value'),
+  body('rejectionReason').optional().isLength({ max: 500 }).trim().escape(),
+];
+

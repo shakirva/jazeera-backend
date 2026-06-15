@@ -13,6 +13,8 @@ enum Role {
   MANAGER
   DRIVER
   RELAY_REP
+  STORE_KEEPER
+  SALESMAN
 }
 
 enum DeliveryStatus {
@@ -66,6 +68,8 @@ model User {
   cashSales   CashSale[]
   leads       Lead[]
   adjustments StockAdjustment[]
+  quotations  Quotation[]       @relation("SalesmanQuotes")
+  visits      CustomerVisit[]   @relation("SalesmanVisits")
 }
 
 model Van {
@@ -104,6 +108,7 @@ model Product {
   deliveryItems DeliveryItem[]
   cashSaleItems CashSaleItem[]
   adjustments   StockAdjustment[]
+  quotationItems QuotationItem[]
 }
 
 model VanInventory {
@@ -146,6 +151,8 @@ model Customer {
   deliveries Delivery[]
   cashSales  CashSale[]
   leads      Lead[]
+  quotations Quotation[]
+  visits     CustomerVisit[]
 }
 
 model Shift {
@@ -270,3 +277,55 @@ model StockAdjustment {
   driver  User    @relation(fields: [driverId], references: [id])
   product Product @relation(fields: [productId], references: [id])
 }
+
+enum QuotationStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  REJECTED
+}
+
+model Quotation {
+  id             String          @id @default(uuid())
+  salesmanId     String
+  customerId     String?
+  status         QuotationStatus @default(DRAFT)
+  totalAmount    Float           @default(0)
+  remarks        String?
+  rejectionReason String?
+  pdfUrl         String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  salesman User          @relation("SalesmanQuotes", fields: [salesmanId], references: [id])
+  customer Customer?     @relation(fields: [customerId], references: [id])
+  items    QuotationItem[]
+}
+
+model QuotationItem {
+  id             String    @id @default(uuid())
+  quotationId    String
+  productId      String
+  quantity       Int
+  unitPrice      Float
+  requestedPrice Float?    // Customer requested price
+  discountPct    Float     @default(0)
+  suggestedMode  Boolean   @default(false) // Suggested price toggle mode
+
+  quotation Quotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+  product   Product   @relation(fields: [productId], references: [id])
+}
+
+model CustomerVisit {
+  id         String   @id @default(uuid())
+  salesmanId String
+  customerId String
+  notes      String?
+  lat        Float?
+  lng        Float?
+  visitedAt  DateTime @default(now())
+
+  salesman User     @relation("SalesmanVisits", fields: [salesmanId], references: [id])
+  customer Customer @relation(fields: [customerId], references: [id])
+}
+

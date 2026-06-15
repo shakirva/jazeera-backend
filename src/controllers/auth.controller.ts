@@ -46,7 +46,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       success: true,
       data: {
         token,
-        driver: {
+        user: {
           id: user.id,
           name: user.name,
           email: user.email,
