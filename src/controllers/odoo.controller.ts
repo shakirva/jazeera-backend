@@ -6,7 +6,8 @@ import prisma from '../utils/prisma';
 // Fetch all products from local PostgreSQL database (synced from Odoo)
 export const getOdooProducts = async (req: Request, res: Response): Promise<void> => {
   try {
-    const limit = parseInt((req.query.limit as string) || '500');
+    // Override limit to make sure we return all products (e.g. 2026+) to the dashboard
+    const limit = Math.max(parseInt((req.query.limit as string) || '10000'), 10000);
     
     const products = await prisma.product.findMany({
       take: limit,

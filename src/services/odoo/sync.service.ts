@@ -4,7 +4,7 @@ import prisma from '../../utils/prisma';
 // ─── Sync Products from Odoo ────────────────────────────
 export async function syncProducts(): Promise<{ created: number; updated: number; total: number }> {
   console.log('🔄 Syncing products from Odoo...');
-  const odooProducts = await odoo.fetchProducts();
+  const odooProducts = await odoo.fetchProducts(10000);
 
   let created = 0;
   let updated = 0;
@@ -57,7 +57,7 @@ export async function syncProducts(): Promise<{ created: number; updated: number
 // ─── Sync Customers from Odoo ───────────────────────────
 export async function syncCustomers(): Promise<{ created: number; updated: number; total: number }> {
   console.log('🔄 Syncing customers from Odoo...');
-  const odooCustomers = await odoo.fetchCustomers();
+  const odooCustomers = await odoo.fetchCustomers(10000);
 
   let created = 0;
   let updated = 0;

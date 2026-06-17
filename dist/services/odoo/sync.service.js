@@ -12,7 +12,7 @@ const prisma_1 = __importDefault(require("../../utils/prisma"));
 // ─── Sync Products from Odoo ────────────────────────────
 async function syncProducts() {
     console.log('🔄 Syncing products from Odoo...');
-    const odooProducts = await odoo_service_1.default.fetchProducts();
+    const odooProducts = await odoo_service_1.default.fetchProducts(10000);
     let created = 0;
     let updated = 0;
     for (const op of odooProducts) {
@@ -61,7 +61,7 @@ async function syncProducts() {
 // ─── Sync Customers from Odoo ───────────────────────────
 async function syncCustomers() {
     console.log('🔄 Syncing customers from Odoo...');
-    const odooCustomers = await odoo_service_1.default.fetchCustomers();
+    const odooCustomers = await odoo_service_1.default.fetchCustomers(10000);
     let created = 0;
     let updated = 0;
     for (const oc of odooCustomers) {
