@@ -9,6 +9,8 @@ import {
   updateQuotationStatus,
   logVisit,
   getVisits,
+  getCustomers,
+  getProducts,
 } from '../controllers/salesman.controller';
 import {
   createQuotationRules,
@@ -35,5 +37,9 @@ router.patch('/quotations/:id/status', authorizeRoles('MANAGER', 'ADMIN'), updat
 // Client Visits Tracking
 router.post('/visits', authorizeRoles('SALESMAN', 'MANAGER', 'ADMIN'), logVisit);
 router.get('/visits', authorizeRoles('SALESMAN', 'MANAGER', 'ADMIN'), getVisits);
+
+// Customers & Products Listing
+router.get('/customers', authorizeRoles('SALESMAN', 'MANAGER', 'ADMIN'), getCustomers);
+router.get('/products', authorizeRoles('SALESMAN', 'MANAGER', 'ADMIN'), getProducts);
 
 export default router;

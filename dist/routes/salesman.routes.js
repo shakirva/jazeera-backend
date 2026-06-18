@@ -18,5 +18,8 @@ router.patch('/quotations/:id/status', (0, auth_1.authorizeRoles)('MANAGER', 'AD
 // Client Visits Tracking
 router.post('/visits', (0, auth_1.authorizeRoles)('SALESMAN', 'MANAGER', 'ADMIN'), salesman_controller_1.logVisit);
 router.get('/visits', (0, auth_1.authorizeRoles)('SALESMAN', 'MANAGER', 'ADMIN'), salesman_controller_1.getVisits);
+// Customers & Products Listing
+router.get('/customers', (0, auth_1.authorizeRoles)('SALESMAN', 'MANAGER', 'ADMIN'), salesman_controller_1.getCustomers);
+router.get('/products', (0, auth_1.authorizeRoles)('SALESMAN', 'MANAGER', 'ADMIN'), salesman_controller_1.getProducts);
 exports.default = router;
 //# sourceMappingURL=salesman.routes.js.map

@@ -206,3 +206,83 @@ Retrieves the history of all visits logged by the salesman.
 * **Endpoint**: `/api/v1/salesman/visits`
 * **Method**: `GET`
 * **Success Response (200 OK)**: Returns array of visits containing notes and coordinates.
+
+---
+
+## 🛍️ 4. Customers & Products Listing
+
+### **List Customers**
+Retrieves a list of customers with optional search and pagination.
+* **Endpoint**: `/api/v1/salesman/customers`
+* **Method**: `GET`
+* **Query Parameters (Optional)**:
+  * `q` / `search`: Query string to filter by name, phone, or address (case-insensitive).
+  * `page`: Page number (default: `1`).
+  * `limit`: Number of items per page (default: `20`).
+* **Success Response (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "data": [
+      {
+        "id": "5ea8986a-30a8-43db-a3b9-dbc47acff0d1",
+        "odooId": 142,
+        "name": "Al Madina Supermarket",
+        "phone": "+971505556666",
+        "email": "madina@example.com",
+        "address": "Al Barsha, Dubai, UAE",
+        "lat": 25.1124,
+        "lng": 55.2001,
+        "createdAt": "2026-06-13T10:00:00.000Z",
+        "updatedAt": "2026-06-13T10:00:00.000Z"
+      }
+    ],
+    "meta": {
+      "total": 1,
+      "page": 1,
+      "limit": 20,
+      "totalPages": 1
+    }
+  }
+  ```
+
+---
+
+### **List Products**
+Retrieves a list of active products with optional search, category filter, and pagination.
+* **Endpoint**: `/api/v1/salesman/products`
+* **Method**: `GET`
+* **Query Parameters (Optional)**:
+  * `q` / `search`: Query string to filter by product name, Arabic name, SKU, or barcode (case-insensitive).
+  * `category`: Filter by product category name (e.g. `Water`).
+  * `page`: Page number (default: `1`).
+  * `limit`: Number of items per page (default: `20`).
+* **Success Response (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "data": [
+      {
+        "id": "24589969-85e9-426a-8777-887e7ffd17a2",
+        "odooId": 32,
+        "sku": "WAT-500",
+        "name": "Mineral Water 500ml",
+        "nameAr": "مياه معدنية 500 مل",
+        "category": "Water",
+        "unit": "pcs",
+        "priceRetail": 1.50,
+        "priceWhole": 1.00,
+        "barcode": "6291011121314",
+        "imageUrl": "data:image/png;base64,...",
+        "isActive": true
+      }
+    ],
+    "meta": {
+      "total": 1,
+      "page": 1,
+      "limit": 20,
+      "totalPages": 1
+    }
+  }
+  ```
+

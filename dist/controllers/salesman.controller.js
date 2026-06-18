@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getVisits = exports.logVisit = exports.updateQuotationStatus = exports.submitQuotation = exports.updateQuotation = exports.getQuotationById = exports.getQuotations = exports.createQuotation = void 0;
+exports.getProducts = exports.getCustomers = exports.getVisits = exports.logVisit = exports.updateQuotationStatus = exports.submitQuotation = exports.updateQuotation = exports.getQuotationById = exports.getQuotations = exports.createQuotation = void 0;
 const prisma_1 = __importDefault(require("../utils/prisma"));
 /**
  * Ensures that a customer exists in the Customer table.
@@ -408,4 +408,120 @@ const getVisits = async (req, res) => {
     }
 };
 exports.getVisits = getVisits;
+// ─── GET /api/v1/salesman/customers ──────────────────────────────────────────
+const getCustomers = async (req, res) => {
+    try {
+        const { q, search, page = '1', limit = '20' } = req.query;
+        const searchQuery = String(q || search || '').trim();
+        const pageNum = parseInt(page);
+        const limitNum = parseInt(limit);
+        const skip = (pageNum - 1) * limitNum;
+        const take = limitNum;
+        const where = {};
+        if (searchQuery) {
+            where.OR = [
+                { name: { contains: searchQuery, mode: 'insensitive' } },
+                { phone: { contains: searchQuery, mode: 'insensitive' } },
+                { address: { contains: searchQuery, mode: 'insensitive' } },
+            ];
+        }
+        const [customers, total] = await Promise.all([
+            prisma_1.default.customer.findMany({
+                where,
+                select: {
+                    id: true,
+                    odooId: true,
+                    name: true,
+                    phone: true,
+                    email: true,
+                    address: true,
+                    lat: true,
+                    lng: true,
+                    createdAt: true,
+                    updatedAt: true,
+                },
+                skip,
+                take,
+                orderBy: { name: 'asc' },
+            }),
+            prisma_1.default.customer.count({ where }),
+        ]);
+        res.json({
+            success: true,
+            data: customers,
+            meta: {
+                total,
+                page: pageNum,
+                limit: limitNum,
+                totalPages: Math.ceil(total / limitNum),
+            },
+        });
+    }
+    catch (err) {
+        console.error('Get Customers Error:', err);
+        res.status(500).json({ success: false, error: 'Failed to retrieve customers' });
+    }
+};
+exports.getCustomers = getCustomers;
+// ─── GET /api/v1/salesman/products ───────────────────────────────────────────
+const getProducts = async (req, res) => {
+    try {
+        const { q, search, category, page = '1', limit = '20' } = req.query;
+        const searchQuery = String(q || search || '').trim();
+        const pageNum = parseInt(page);
+        const limitNum = parseInt(limit);
+        const skip = (pageNum - 1) * limitNum;
+        const take = limitNum;
+        const where = { isActive: true };
+        if (searchQuery) {
+            where.OR = [
+                { name: { contains: searchQuery, mode: 'insensitive' } },
+                { nameAr: { contains: searchQuery, mode: 'insensitive' } },
+                { sku: { contains: searchQuery, mode: 'insensitive' } },
+                { barcode: { contains: searchQuery } },
+            ];
+        }
+        if (category) {
+            where.category = category;
+        }
+        const [products, total] = await Promise.all([
+            prisma_1.default.product.findMany({
+                where,
+                select: {
+                    id: true,
+                    odooId: true,
+                    sku: true,
+                    name: true,
+                    nameAr: true,
+                    category: true,
+                    unit: true,
+                    priceRetail: true,
+                    priceWhole: true,
+                    barcode: true,
+                    imageUrl: true,
+                    isActive: true,
+                },
+                skip,
+                take,
+                orderBy: { name: 'asc' },
+            }),
+            prisma_1.default.product.count({ where }),
+        ]);
+        res.json({
+            success: true,
+            data: products,
+            meta: {
+                total,
+                page: pageNum,
+                limit: limitNum,
+                totalPages: Math.ceil(total / limitNum),
+            },
+        });
+    }
+    catch (err) {
+        console.error('Get Products Error:', err);
+        res.status(500).json({ success: false, error: 'Failed to retrieve products' });
+    }
+};
+exports.getProducts = getProducts;
 //# sourceMappingURL=salesman.controller.js.map

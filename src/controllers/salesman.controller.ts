@@ -444,3 +444,126 @@ export const getVisits = async (req: AuthRequest, res: Response): Promise<void> 
     res.status(500).json({ success: false, error: 'Failed to retrieve visits' });
   }
 };
+
+// ─── GET /api/v1/salesman/customers ──────────────────────────────────────────
+export const getCustomers = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { q, search, page = '1', limit = '20' } = req.query;
+    const searchQuery = String(q || search || '').trim();
+
+    const pageNum = parseInt(page as string);
+    const limitNum = parseInt(limit as string);
+    const skip = (pageNum - 1) * limitNum;
+    const take = limitNum;
+
+    const where: any = {};
+    if (searchQuery) {
+      where.OR = [
+        { name: { contains: searchQuery, mode: 'insensitive' } },
+        { phone: { contains: searchQuery, mode: 'insensitive' } },
+        { address: { contains: searchQuery, mode: 'insensitive' } },
+      ];
+    }
+
+    const [customers, total] = await Promise.all([
+      prisma.customer.findMany({
+        where,
+        select: {
+          id: true,
+          odooId: true,
+          name: true,
+          phone: true,
+          email: true,
+          address: true,
+          lat: true,
+          lng: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+        skip,
+        take,
+        orderBy: { name: 'asc' },
+      }),
+      prisma.customer.count({ where }),
+    ]);
+
+    res.json({
+      success: true,
+      data: customers,
+      meta: {
+        total,
+        page: pageNum,
+        limit: limitNum,
+        totalPages: Math.ceil(total / limitNum),
+      },
+    });
+  } catch (err) {
+    console.error('Get Customers Error:', err);
+    res.status(500).json({ success: false, error: 'Failed to retrieve customers' });
+  }
+};
+
+// ─── GET /api/v1/salesman/products ───────────────────────────────────────────
+export const getProducts = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { q, search, category, page = '1', limit = '20' } = req.query;
+    const searchQuery = String(q || search || '').trim();
+
+    const pageNum = parseInt(page as string);
+    const limitNum = parseInt(limit as string);
+    const skip = (pageNum - 1) * limitNum;
+    const take = limitNum;
+
+    const where: any = { isActive: true };
+    if (searchQuery) {
+      where.OR = [
+        { name: { contains: searchQuery, mode: 'insensitive' } },
+        { nameAr: { contains: searchQuery, mode: 'insensitive' } },
+        { sku: { contains: searchQuery, mode: 'insensitive' } },
+        { barcode: { contains: searchQuery } },
+      ];
+    }
+    if (category) {
+      where.category = category as string;
+    }
+
+    const [products, total] = await Promise.all([
+      prisma.product.findMany({
+        where,
+        select: {
+          id: true,
+          odooId: true,
+          sku: true,
+          name: true,
+          nameAr: true,
+          category: true,
+          unit: true,
+          priceRetail: true,
+          priceWhole: true,
+          barcode: true,
+          imageUrl: true,
+          isActive: true,
+        },
+        skip,
+        take,
+        orderBy: { name: 'asc' },
+      }),
+      prisma.product.count({ where }),
+    ]);
+
+    res.json({
+      success: true,
+      data: products,
+      meta: {
+        total,
+        page: pageNum,
+        limit: limitNum,
+        totalPages: Math.ceil(total / limitNum),
+      },
+    });
+  } catch (err) {
+    console.error('Get Products Error:', err);
+    res.status(500).json({ success: false, error: 'Failed to retrieve products' });
+  }
+};
+

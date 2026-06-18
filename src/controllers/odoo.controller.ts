@@ -149,12 +149,32 @@ export const getOdooStock = async (req: Request, res: Response): Promise<void> =
       productMap[productId].locations.push({ location: locationName, qty });
     }
 
-    const data = Object.entries(productMap).map(([productId, info]) => ({
-      productId: parseInt(productId),
-      productName: info.productName,
-      totalQty: Math.round(info.totalQty),
-      locations: info.locations,
-    }));
+    // Fetch local products mapping Odoo ID to SKU and Image URL
+    const productOdooIds = Object.keys(productMap).map(id => parseInt(id));
+    const localProducts = await prisma.product.findMany({
+      where: { odooId: { in: productOdooIds } },
+      select: { odooId: true, sku: true, imageUrl: true }
+    });
+
+    const localProductMap: Record<number, { sku: string; imageUrl: string | null }> = {};
+    for (const p of localProducts) {
+      if (p.odooId !== null) {
+        localProductMap[p.odooId] = { sku: p.sku, imageUrl: p.imageUrl };
+      }
+    }
+
+    const data = Object.entries(productMap).map(([productId, info]) => {
+      const pId = parseInt(productId);
+      const localProduct = localProductMap[pId];
+      return {
+        productId: pId,
+        productName: info.productName,
+        sku: localProduct?.sku || null,
+        imageUrl: localProduct?.imageUrl || null,
+        totalQty: Math.round(info.totalQty),
+        locations: info.locations,
+      };
+    });
 
     res.json({
       success: true,
