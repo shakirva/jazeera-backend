@@ -12,5 +12,13 @@ router.use((0, auth_1.authorizeRoles)('STORE_KEEPER', 'ADMIN', 'MANAGER'));
 router.get('/vans', storekeeper_controller_1.getVans);
 router.get('/vans/:vanId/queue', storekeeper_controller_1.getVanQueue);
 router.post('/vans/:vanId/load', validators_1.assignVanLoadRules, validators_1.validate, storekeeper_controller_1.assignVanLoad);
+// New endpoints
+router.get('/dashboard', storekeeper_controller_1.getDashboard);
+router.get('/warehouse-stock', storekeeper_controller_1.getWarehouseStock);
+router.post('/drivers/search', storekeeper_controller_1.searchDrivers);
+router.get('/damaged-stock', storekeeper_controller_1.getDamagedStock);
+router.post('/damaged-stock', storekeeper_controller_1.reportDamagedStock);
+router.get('/vans/:vanId/reconciliation', storekeeper_controller_1.getReconciliation);
+router.post('/vans/:vanId/reconciliation', storekeeper_controller_1.submitReconciliation);
 exports.default = router;
 //# sourceMappingURL=storekeeper.routes.js.map

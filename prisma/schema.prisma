@@ -280,6 +280,7 @@ model StockAdjustment {
   quantity  Int
   reason    AdjustmentReason
   notes     String?
+  imageUrl  String?
   createdAt DateTime         @default(now())
 
   driver  User    @relation(fields: [driverId], references: [id])

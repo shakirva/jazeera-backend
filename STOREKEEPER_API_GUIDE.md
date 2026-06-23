@@ -234,6 +234,202 @@ View current stocks loaded inside the van.
 
 ---
 
+## 4. Newly Added Storekeeper Endpoints
+
+### A. Get Dashboard Statistics
+Get live counts for the storekeeper dashboard.
+
+* **Method**: `GET`
+* **Endpoint**: `/api/v1/storekeeper/dashboard`
+* **Response**:
+  ```json
+  {
+    "success": true,
+    "data": {
+      "warehouseStockCount": 1250,
+      "waitingVanCount": 3,
+      "damagedStockCount": 12
+    }
+  }
+  ```
+
+### B. Get Warehouse Stock
+Get a list of all products along with their live stock quantity in the main warehouse.
+
+* **Method**: `GET`
+* **Endpoint**: `/api/v1/storekeeper/warehouse-stock`
+* **Query Parameters**:
+  - `q` (optional): search string to filter by product name or SKU
+  - `page` (optional): page number (default: `1`)
+  - `limit` (optional): items per page (default: `20`)
+  - `lowStockThreshold` (optional): threshold to determine low stock (default: `10`)
+* **Response**:
+  ```json
+  {
+    "success": true,
+    "data": {
+      "totalSkuCount": 42,
+      "lowStockCount": 5,
+      "outOfStockCount": 2,
+      "products": [
+        {
+          "id": "product-uuid-444",
+          "name": "Mineral Water 500ml",
+          "sku": "WAT-500",
+          "imageUrl": "data:image/png;base64,...",
+          "totalStock": 150
+        }
+      ]
+    },
+    "meta": {
+      "total": 42,
+      "page": 1,
+      "limit": 20,
+      "totalPages": 3
+    }
+  }
+  ```
+
+### C. Search Driver or Van
+Search for drivers (and their corresponding vans) and check if they have active shifts and loaded stock.
+
+* **Method**: `POST`
+* **Endpoint**: `/api/v1/storekeeper/drivers/search`
+* **Request Body**:
+  ```json
+  {
+    "q": "Ahmed" // search by driver name or van number
+  }
+  ```
+* **Response**:
+  ```json
+  {
+    "success": true,
+    "data": [
+      {
+        "driverId": "driver-uuid-222",
+        "driverName": "Ahmed Al-Rashid",
+        "vanNumber": "DXB-A-12345",
+        "assignedDate": "2026-06-17T09:00:00.000Z",
+        "totalLoadedItems": 50,
+        "status": "PENDING" // status can be: PENDING, ACCEPTED, REJECTED, or NONE (no active shift)
+      }
+    ]
+  }
+  ```
+
+### D. Get Today's Damaged Stock Report
+Fetch the list of all damaged stock items reported on a specific date.
+
+* **Method**: `GET`
+* **Endpoint**: `/api/v1/storekeeper/damaged-stock`
+* **Query Parameters**:
+  - `date` (optional): filter by date (e.g. `2026-06-23`, defaults to today)
+* **Response**:
+  ```json
+  {
+    "success": true,
+    "data": {
+      "reportDate": "2026-06-23",
+      "totalDamageProductCount": 12,
+      "items": [
+        {
+          "adjustmentId": "adj-uuid-999",
+          "productId": "product-uuid-444",
+          "productName": "Mineral Water 500ml",
+          "sku": "WAT-500",
+          "productImage": null, // URL or base64 data of product thumbnail
+          "proofImage": "https://example.com/receipts/proof.jpg", // Photo proof of damage
+          "quantity": 5,
+          "vanNumber": "DXB-A-12345",
+          "driverName": "Ahmed Al-Rashid",
+          "uploadedAt": "2026-06-23T08:15:00.000Z",
+          "reason": "Bottle leaking"
+        }
+      ]
+    }
+  }
+  ```
+
+### E. Report Damaged Stock (Submit Damage Report)
+Report damaged stock in a van, which decrements the van inventory, records a stock adjustment locally, and logs it in Odoo.
+
+* **Method**: `POST`
+* **Endpoint**: `/api/v1/storekeeper/damaged-stock`
+* **Request Body**:
+  ```json
+  {
+    "productId": "product-uuid-444",
+    "vanId": "van-uuid-111",
+    "quantity": 3,
+    "reason": "DAMAGE", // DAMAGE, EXPIRY, THEFT, OTHER
+    "notes": "Box crushed",
+    "imageUrl": "https://example.com/proof.jpg" // Optional proof image URL
+  }
+  ```
+* **Response**:
+  ```json
+  {
+    "success": true,
+    "message": "Report submitted successfully"
+  }
+  ```
+
+### F. Get Van Stock Reconciliation
+Get a product-by-product breakdown of loaded, sold, damaged, and balance (remaining) stock for a van's active shift.
+
+* **Method**: `GET`
+* **Endpoint**: `/api/v1/storekeeper/vans/:vanId/reconciliation`
+* **Response**:
+  ```json
+  {
+    "success": true,
+    "data": {
+      "summary": {
+        "loadedStock": 100,
+        "soldStock": 40,
+        "damagedStock": 5,
+        "balanceStock": 55
+      },
+      "products": [
+        {
+          "productId": "product-uuid-444",
+          "productName": "Mineral Water 500ml",
+          "sku": "WAT-500",
+          "imageUrl": null,
+          "loadedStock": 50,
+          "soldStock": 20,
+          "damagedStock": 2,
+          "balanceStock": 28
+        }
+      ]
+    }
+  }
+  ```
+
+### G. Submit Stock Reconciliation
+Manually log sold and/or damaged quantities for a product on a van, updating the van inventory.
+
+* **Method**: `POST`
+* **Endpoint**: `/api/v1/storekeeper/vans/:vanId/reconciliation`
+* **Request Body**:
+  ```json
+  {
+    "productId": "product-uuid-444",
+    "soldQuantity": 5, // Quantity sold (optional, default 0, will write cash sale)
+    "damagedQuantity": 2 // Quantity damaged (optional, default 0, will write stock adjustment)
+  }
+  ```
+* **Response**:
+  ```json
+  {
+    "success": true,
+    "message": "Stock updated successfully"
+  }
+  ```
+
+---
+
 ## Sharing & Testing Steps
 
 1. **Share the Postman Collection**:

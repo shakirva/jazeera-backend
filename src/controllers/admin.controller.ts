@@ -661,6 +661,13 @@ export const getVanWarehouse = async (req: Request, res: Response): Promise<void
         })
       : [];
 
+    // Damaged stock adjustments made by van's driver on that day
+    const adjustments = driverIds.length > 0
+      ? await prisma.stockAdjustment.findMany({
+          where: { driverId: { in: driverIds }, reason: 'DAMAGE', createdAt: { gte: dayStart, lte: dayEnd } },
+        })
+      : [];
+
     // Build sold-per-product map from cash sales
     const soldMap = new Map<string, { productId: string; name: string; sku: string; unit: string; soldQty: number; revenue: number }>();
     for (const sale of cashSales) {
@@ -678,10 +685,17 @@ export const getVanWarehouse = async (req: Request, res: Response): Promise<void
       loadedMap.set(item.productId, (loadedMap.get(item.productId) ?? 0) + item.quantity);
     }
 
+    // Build damaged-per-product map
+    const damagedMap = new Map<string, number>();
+    for (const adj of adjustments) {
+      damagedMap.set(adj.productId, (damagedMap.get(adj.productId) ?? 0) + Math.abs(adj.quantity));
+    }
+
     // Current van inventory (live remaining stock)
     const currentInventory = van.inventory.map(inv => {
       const loaded = loadedMap.get(inv.productId) ?? inv.quantity;
       const sold = soldMap.get(inv.productId);
+      const damaged = damagedMap.get(inv.productId) ?? 0;
       return {
         productId: inv.productId,
         name: inv.product.name,
@@ -692,6 +706,7 @@ export const getVanWarehouse = async (req: Request, res: Response): Promise<void
         loadedQty: loaded,
         remainingQty: inv.quantity,
         soldQty: sold?.soldQty ?? (loaded - inv.quantity > 0 ? loaded - inv.quantity : 0),
+        damagedQty: damaged,
         revenue: sold?.revenue ?? 0,
       };
     });
@@ -699,6 +714,7 @@ export const getVanWarehouse = async (req: Request, res: Response): Promise<void
     const totalLoaded = currentInventory.reduce((s, i) => s + i.loadedQty, 0);
     const totalRemaining = currentInventory.reduce((s, i) => s + i.remainingQty, 0);
     const totalSold = currentInventory.reduce((s, i) => s + i.soldQty, 0);
+    const totalDamaged = currentInventory.reduce((s, i) => s + i.damagedQty, 0);
     const totalRevenue = currentInventory.reduce((s, i) => s + i.revenue, 0);
 
     const deliverySummary = deliveries.reduce((acc, d) => {
@@ -722,6 +738,7 @@ export const getVanWarehouse = async (req: Request, res: Response): Promise<void
         summary: {
           totalLoaded,
           totalSold,
+          totalDamaged,
           totalRemaining,
           totalRevenue,
           deliveries: deliverySummary,

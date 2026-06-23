@@ -174,6 +174,268 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Get Dashboard",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{storekeeper_jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/storekeeper/dashboard",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "storekeeper",
+                "dashboard"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Warehouse Stock",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{storekeeper_jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/storekeeper/warehouse-stock?q=&page=1&limit=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "storekeeper",
+                "warehouse-stock"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": ""
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search Drivers",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{storekeeper_jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"q\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/storekeeper/drivers/search",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "storekeeper",
+                "drivers",
+                "search"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Damaged Stock",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{storekeeper_jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/storekeeper/damaged-stock?date=",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "storekeeper",
+                "damaged-stock"
+              ],
+              "query": [
+                {
+                  "key": "date",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Report Damaged Stock",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{storekeeper_jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"PASTE_PRODUCT_UUID_HERE\",\n  \"vanId\": \"{{van_id}}\",\n  \"quantity\": 5,\n  \"reason\": \"DAMAGE\",\n  \"notes\": \"Bottle leaking\",\n  \"imageUrl\": \"http://example.com/image.jpg\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/storekeeper/damaged-stock",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "storekeeper",
+                "damaged-stock"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Stock Reconciliation",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{storekeeper_jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/storekeeper/vans/{{van_id}}/reconciliation",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "storekeeper",
+                "vans",
+                "{{van_id}}",
+                "reconciliation"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Submit Stock Reconciliation",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{storekeeper_jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"PASTE_PRODUCT_UUID_HERE\",\n  \"soldQuantity\": 5,\n  \"damagedQuantity\": 2\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/storekeeper/vans/{{van_id}}/reconciliation",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "storekeeper",
+                "vans",
+                "{{van_id}}",
+                "reconciliation"
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },
