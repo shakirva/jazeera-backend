@@ -318,7 +318,7 @@ export const getStockQueue = async (req: AuthRequest, res: Response): Promise<vo
     }
 
     const queue = await prisma.stockLoadQueue.findMany({
-      where: { shiftId: shift.id, confirmed: false },
+      where: { vanId: shift.vanId, confirmed: false },
       include: { product: { select: { id: true, name: true, sku: true, unit: true, imageUrl: true } } },
     });
 
@@ -346,7 +346,7 @@ export const confirmStockLoad = async (req: AuthRequest, res: Response): Promise
     }
 
     const queueItems = await prisma.stockLoadQueue.findMany({
-      where: { shiftId: shift.id, confirmed: false },
+      where: { vanId: shift.vanId, confirmed: false },
       include: { product: { select: { id: true, name: true, odooId: true } } },
     });
 
@@ -365,8 +365,8 @@ export const confirmStockLoad = async (req: AuthRequest, res: Response): Promise
         });
       }
       await tx.stockLoadQueue.updateMany({
-        where: { shiftId: shift.id, confirmed: false },
-        data: { confirmed: true, status: 'ACCEPTED' },
+        where: { vanId: shift.vanId, confirmed: false },
+        data: { confirmed: true, status: 'ACCEPTED', shiftId: shift.id },
       });
     });
 
@@ -399,7 +399,7 @@ export const rejectStockLoad = async (req: AuthRequest, res: Response): Promise<
     }
 
     const queueItems = await prisma.stockLoadQueue.findMany({
-      where: { shiftId: shift.id, confirmed: false },
+      where: { vanId: shift.vanId, confirmed: false },
     });
 
     if (queueItems.length === 0) {
@@ -408,7 +408,7 @@ export const rejectStockLoad = async (req: AuthRequest, res: Response): Promise<
     }
 
     await prisma.stockLoadQueue.updateMany({
-      where: { shiftId: shift.id, confirmed: false },
+      where: { vanId: shift.vanId, confirmed: false },
       data: {
         status: 'REJECTED',
         notes: notes || null,

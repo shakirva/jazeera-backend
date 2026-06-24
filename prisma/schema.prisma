@@ -91,6 +91,7 @@ model Van {
   driver    User?          @relation("VanDriver", fields: [driverId], references: [id])
   inventory VanInventory[]
   shifts    Shift[]
+  stockQueue StockLoadQueue[]
 }
 
 model Product {
@@ -179,7 +180,8 @@ model Shift {
 
 model StockLoadQueue {
   id        String     @id @default(uuid())
-  shiftId   String
+  vanId     String
+  shiftId   String?
   productId String
   quantity  Int
   confirmed Boolean    @default(false)
@@ -187,10 +189,9 @@ model StockLoadQueue {
   notes     String?
   scannedAt DateTime   @default(now())
 
-  shift   Shift   @relation(fields: [shiftId], references: [id])
+  van     Van     @relation(fields: [vanId], references: [id])
+  shift   Shift?  @relation(fields: [shiftId], references: [id])
   product Product @relation(fields: [productId], references: [id])
-
-  @@unique([shiftId, productId])
 }
 
 model Delivery {

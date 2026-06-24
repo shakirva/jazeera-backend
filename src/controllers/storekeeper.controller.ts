@@ -69,29 +69,38 @@ export const getVanQueue = async (req: AuthRequest, res: Response): Promise<void
   try {
     const { vanId } = req.params;
 
-    const shift = await prisma.shift.findFirst({
-      where: { vanId, status: 'ACTIVE' },
+    const van = await prisma.van.findUnique({
+      where: { id: vanId },
       include: {
         driver: {
-          select: {
-            id: true,
-            name: true,
+          select: { id: true, name: true },
+        },
+        shifts: {
+          where: { status: 'ACTIVE' },
+          include: {
+            driver: { select: { id: true, name: true } },
           },
+          orderBy: { startedAt: 'desc' },
+          take: 1,
         },
       },
-      orderBy: { startedAt: 'desc' },
     });
 
-    if (!shift) {
-      res.status(400).json({
-        success: false,
-        error: 'No active shift found for this van. Please have the driver start their shift first.',
-      });
+    if (!van) {
+      res.status(404).json({ success: false, error: 'Van not found' });
       return;
     }
 
+    const activeShift = van.shifts[0];
+
     const queue = await prisma.stockLoadQueue.findMany({
-      where: { shiftId: shift.id },
+      where: {
+        vanId,
+        OR: [
+          { confirmed: false },
+          activeShift ? { shiftId: activeShift.id, confirmed: true } : { id: 'no-match' }
+        ]
+      },
       include: {
         product: {
           select: {
@@ -110,11 +119,8 @@ export const getVanQueue = async (req: AuthRequest, res: Response): Promise<void
       success: true,
       data: queue,
       meta: {
-        driver: {
-          id: shift.driver.id,
-          name: shift.driver.name,
-        },
-        shiftId: shift.id,
+        driver: activeShift ? activeShift.driver : (van.driver || null),
+        shiftId: activeShift ? activeShift.id : null,
       },
     });
   } catch (err) {
@@ -134,20 +140,6 @@ export const assignVanLoad = async (req: AuthRequest, res: Response): Promise<vo
       return;
     }
 
-    // Find the active shift
-    const shift = await prisma.shift.findFirst({
-      where: { vanId, status: 'ACTIVE' },
-      orderBy: { startedAt: 'desc' },
-    });
-
-    if (!shift) {
-      res.status(400).json({
-        success: false,
-        error: 'No active shift found for this van. Please have the driver start their shift first.',
-      });
-      return;
-    }
-
     // Validate products list
     for (const item of products) {
       if (!item.productId || typeof item.quantity !== 'number' || item.quantity <= 0) {
@@ -161,36 +153,42 @@ export const assignVanLoad = async (req: AuthRequest, res: Response): Promise<vo
 
     // Check if any of these products are already accepted (confirmed: true) in the active shift
     const productIds = products.map((p) => p.productId);
-    const existingConfirmed = await prisma.stockLoadQueue.findMany({
-      where: {
-        shiftId: shift.id,
-        productId: { in: productIds },
-        confirmed: true,
-      },
-      include: {
-        product: {
-          select: {
-            name: true,
-          },
-        },
-      },
+    
+    const shift = await prisma.shift.findFirst({
+      where: { vanId, status: 'ACTIVE' },
+      orderBy: { startedAt: 'desc' },
     });
 
-    if (existingConfirmed.length > 0) {
-      const names = existingConfirmed.map((item) => item.product.name).join(', ');
-      res.status(400).json({
-        success: false,
-        error: `The following products have already been loaded and accepted in this shift: ${names}.`,
+    if (shift) {
+      const existingConfirmed = await prisma.stockLoadQueue.findMany({
+        where: {
+          shiftId: shift.id,
+          productId: { in: productIds },
+          confirmed: true,
+        },
+        include: {
+          product: {
+            select: { name: true },
+          },
+        },
       });
-      return;
+
+      if (existingConfirmed.length > 0) {
+        const names = existingConfirmed.map((item) => item.product.name).join(', ');
+        res.status(400).json({
+          success: false,
+          error: `The following products have already been loaded and accepted in this shift: ${names}.`,
+        });
+        return;
+      }
     }
 
     // Transactionally update the stock load queue
     await prisma.$transaction(async (tx) => {
-      // Delete existing unconfirmed (PENDING or REJECTED) queue items for this shift
+      // Delete existing unconfirmed (PENDING or REJECTED) queue items for this van
       await tx.stockLoadQueue.deleteMany({
         where: {
-          shiftId: shift.id,
+          vanId,
           confirmed: false,
         },
       });
@@ -199,7 +197,8 @@ export const assignVanLoad = async (req: AuthRequest, res: Response): Promise<vo
       if (products.length > 0) {
         await tx.stockLoadQueue.createMany({
           data: products.map((item) => ({
-            shiftId: shift.id,
+            vanId,
+            shiftId: null,
             productId: item.productId,
             quantity: item.quantity,
             confirmed: false,
@@ -389,11 +388,15 @@ export const searchDrivers = async (req: AuthRequest, res: Response): Promise<vo
           : undefined,
       },
       include: {
-        van: true,
+        van: {
+          include: {
+            stockQueue: { where: { confirmed: false } }
+          }
+        },
         shifts: {
           where: { status: 'ACTIVE' },
           include: {
-            stockQueue: true,
+            stockQueue: { where: { confirmed: true } }
           },
         },
       },
@@ -403,8 +406,11 @@ export const searchDrivers = async (req: AuthRequest, res: Response): Promise<vo
     const data = drivers.map((driver) => {
       const activeShift = driver.shifts[0];
       const vanNumber = driver.van?.plateNumber || 'No Van';
+      const unconfirmedQueue = driver.van?.stockQueue || [];
+      const confirmedQueue = activeShift?.stockQueue || [];
+      const queueItems = [...unconfirmedQueue, ...confirmedQueue];
 
-      if (!activeShift) {
+      if (!activeShift && unconfirmedQueue.length === 0) {
         return {
           driverId: driver.id,
           driverName: driver.name,
@@ -415,7 +421,6 @@ export const searchDrivers = async (req: AuthRequest, res: Response): Promise<vo
         };
       }
 
-      const queueItems = activeShift.stockQueue;
       const totalLoadedItems = queueItems.reduce((sum, item) => sum + item.quantity, 0);
 
       let status = 'PENDING';
@@ -435,7 +440,7 @@ export const searchDrivers = async (req: AuthRequest, res: Response): Promise<vo
         driverId: driver.id,
         driverName: driver.name,
         vanNumber,
-        assignedDate: activeShift.startedAt,
+        assignedDate: activeShift?.startedAt || null,
         totalLoadedItems,
         status,
       };
