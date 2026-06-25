@@ -1,4 +1,5 @@
 import { Response } from 'express';
+import { v4 as uuidv4 } from 'uuid';
 import prisma from '../utils/prisma';
 import { AuthRequest } from '../types';
 import odoo from '../services/odoo/odoo.service';
@@ -197,6 +198,7 @@ export const assignVanLoad = async (req: AuthRequest, res: Response): Promise<vo
       if (products.length > 0) {
         await tx.stockLoadQueue.createMany({
           data: products.map((item) => ({
+            id: uuidv4(),
             vanId,
             shiftId: null,
             productId: item.productId,
