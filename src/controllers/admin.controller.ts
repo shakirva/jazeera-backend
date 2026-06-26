@@ -619,11 +619,16 @@ export const getVanWarehouse = async (req: Request, res: Response): Promise<void
       return;
     }
 
-    // Shift(s) that were active on the target day for this van
+    // ── Find shifts for this van on the target day:
+    //    (1) shifts that STARTED on that day, OR
+    //    (2) shifts that are still ACTIVE (may have started on a previous day)
     const shifts = await prisma.shift.findMany({
       where: {
         vanId: id,
-        startedAt: { gte: dayStart, lte: dayEnd },
+        OR: [
+          { startedAt: { gte: dayStart, lte: dayEnd } },   // started on target day
+          { status: 'ACTIVE' },                             // still running (may have started earlier)
+        ],
       },
       include: {
         driver: { select: { id: true, name: true } },
@@ -692,7 +697,7 @@ export const getVanWarehouse = async (req: Request, res: Response): Promise<void
     }
 
     // Current van inventory (live remaining stock)
-    const currentInventory = van.inventory.map(inv => {
+    const currentInventory = (van.inventory ?? []).map(inv => {
       const loaded = loadedMap.get(inv.productId) ?? inv.quantity;
       const sold = soldMap.get(inv.productId);
       const damaged = damagedMap.get(inv.productId) ?? 0;
@@ -751,6 +756,7 @@ export const getVanWarehouse = async (req: Request, res: Response): Promise<void
     res.status(500).json({ success: false, error: 'Failed to get van warehouse data' });
   }
 };
+
 
 // PATCH /api/v1/admin/settings
 export const updateSettings = async (req: Request, res: Response): Promise<void> => {
