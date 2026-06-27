@@ -23,7 +23,13 @@ export const login = async (req: Request, res: Response): Promise<void> => {
           { phone: phone ?? undefined },
         ],
       },
-      include: { van: { select: { id: true, plateNumber: true } } },
+      include: { 
+        van: { select: { id: true, plateNumber: true } },
+        shifts: {
+          where: { status: 'ACTIVE' },
+          take: 1
+        }
+      },
     });
     console.log("USER FOUND:", !!user);
 
@@ -45,10 +51,13 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       { expiresIn: '7d' }
     );
 
+    const isShiftStarted = user.shifts && user.shifts.length > 0;
+
     res.json({
       success: true,
       data: {
         token,
+        isShiftStarted,
         user: {
           id: user.id,
           name: user.name,
@@ -56,6 +65,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
           phone: user.phone,
           role: user.role,
           van: user.van,
+          isShiftStarted,
         },
       },
     });
@@ -77,6 +87,10 @@ export const getMe = async (req: AuthRequest, res: Response): Promise<void> => {
         phone: true,
         role: true,
         van: { select: { id: true, plateNumber: true, model: true } },
+        shifts: {
+          where: { status: 'ACTIVE' },
+          take: 1
+        }
       },
     });
 
@@ -85,7 +99,10 @@ export const getMe = async (req: AuthRequest, res: Response): Promise<void> => {
       return;
     }
 
-    res.json({ success: true, data: user });
+    const { shifts, ...userData } = user;
+    const isShiftStarted = shifts && shifts.length > 0;
+
+    res.json({ success: true, data: { ...userData, isShiftStarted } });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, error: 'Failed to get user' });
