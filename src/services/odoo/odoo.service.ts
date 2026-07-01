@@ -385,8 +385,22 @@ export async function validateStockPicking(pickingId: number): Promise<void> {
   const picking: any[] = await read('stock.picking', [pickingId], ['move_line_ids', 'move_ids']);
   if (picking[0]?.move_line_ids?.length > 0) {
     for (const lineId of picking[0].move_line_ids) {
-      const [line] = await read('stock.move.line', [lineId], ['reserved_qty', 'quantity']);
-      await write('stock.move.line', [lineId], { quantity: line.reserved_qty || line.quantity });
+      // Pass [] to read ALL fields safely, avoiding "Invalid field" crashes across Odoo versions
+      const [line] = await read('stock.move.line', [lineId], []);
+      
+      const reserved = line.reserved_uom_qty || line.product_uom_qty || line.reserved_qty || 0;
+      const currentDone = line.quantity || line.qty_done || 0;
+      
+      const qtyToSet = reserved || currentDone;
+      
+      // Determine correct write field based on what exists on the record
+      const writeData: any = {};
+      if ('quantity' in line) writeData.quantity = qtyToSet;
+      else if ('qty_done' in line) writeData.qty_done = qtyToSet;
+      
+      if (Object.keys(writeData).length > 0) {
+        await write('stock.move.line', [lineId], writeData);
+      }
     }
   }
 
